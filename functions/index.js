@@ -6,17 +6,29 @@ const { PlaidApi, Configuration, PlaidEnvironments } = require('plaid');
 admin.initializeApp();
 
 // Initialize Plaid client
-const configuration = new Configuration({
-  basePath: PlaidEnvironments.sandbox, // Change to production when ready
-  baseOptions: {
-    headers: {
-      'PLAID-CLIENT-ID': functions.config().plaid.client_id,
-      'PLAID-SECRET': functions.config().plaid.secret,
-    },
-  },
-});
+let client = null;
 
-const client = new PlaidApi(configuration);
+function getPlaidClient() {
+  if (!client) {
+    const config = functions.config();
+    if (!config.plaid || !config.plaid.client_id || !config.plaid.secret) {
+      throw new Error('Plaid configuration missing. Please set plaid.client_id and plaid.secret using Firebase Functions config.');
+    }
+    
+    const configuration = new Configuration({
+      basePath: PlaidEnvironments.sandbox, // Change to production when ready
+      baseOptions: {
+        headers: {
+          'PLAID-CLIENT-ID': config.plaid.client_id,
+          'PLAID-SECRET': config.plaid.secret,
+        },
+      },
+    });
+    
+    client = new PlaidApi(configuration);
+  }
+  return client;
+}
 
 // Create Plaid Link Token
 exports.createLinkToken = functions.https.onRequest(async (req, res) => {
@@ -35,7 +47,8 @@ exports.createLinkToken = functions.https.onRequest(async (req, res) => {
         webhook: 'https://webhook.example.com', // Replace with your webhook URL
       };
 
-      const response = await client.linkTokenCreate(configs);
+      const plaidClient = getPlaidClient();
+      const response = await plaidClient.linkTokenCreate(configs);
       res.json(response.data);
     } catch (error) {
       console.error('Error creating link token:', error);
@@ -50,14 +63,15 @@ exports.exchangePublicToken = functions.https.onRequest(async (req, res) => {
     try {
       const { public_token, user_id } = req.body;
       
-      const response = await client.itemPublicTokenExchange({
+      const plaidClient = getPlaidClient();
+      const response = await plaidClient.itemPublicTokenExchange({
         public_token: public_token,
       });
 
       const { access_token, item_id } = response.data;
 
       // Get account information
-      const accountsResponse = await client.accountsGet({
+      const accountsResponse = await plaidClient.accountsGet({
         access_token: access_token,
       });
 
@@ -114,7 +128,8 @@ exports.fetchTransactions = functions.https.onRequest(async (req, res) => {
       for (const doc of plaidItems.docs) {
         const { access_token } = doc.data();
         
-        const response = await client.transactionsGet({
+        const plaidClient = getPlaidClient();
+        const response = await plaidClient.transactionsGet({
           access_token: access_token,
           start_date: start_date || '2023-01-01',
           end_date: end_date || new Date().toISOString().split('T')[0],
@@ -168,7 +183,8 @@ exports.updateBalances = functions.https.onRequest(async (req, res) => {
       for (const doc of plaidItems.docs) {
         const { access_token, item_id } = doc.data();
         
-        const response = await client.accountsGet({
+        const plaidClient = getPlaidClient();
+        const response = await plaidClient.accountsGet({
           access_token: access_token,
         });
 
@@ -215,7 +231,8 @@ exports.scheduledTransactionSync = functions.pubsub.schedule('every 24 hours').o
         const endDate = new Date().toISOString().split('T')[0];
         const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // Last 30 days
         
-        const response = await client.transactionsGet({
+        const plaidClient = getPlaidClient();
+        const response = await plaidClient.transactionsGet({
           access_token: access_token,
           start_date: startDate,
           end_date: endDate,

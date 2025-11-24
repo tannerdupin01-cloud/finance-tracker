@@ -1232,8 +1232,8 @@
                         var ac = accounts[n];
                         accCards += '<div class="account-card"><h3 style="font-weight:600;margin-bottom:0.5rem">' + (ac.name || 'Account') + '</h3><p style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:0.5rem">' + (ac.type || '') + '</p><p style="font-size:1.875rem;font-weight:bold;color:#4f46e5">$' + (ac.balance || 0).toFixed(2) + '</p></div>';
                     }
-                    content = '<div class="section-header"><h2 class="section-title">Accounts</h2><button class="btn-add" onclick="saveAccount()">+ Connect</button></div>' +
-                        (accounts.length === 0 ? '<div class="card empty-state"><h3>No accounts connected</h3><p>Connect your bank account</p></div>' : '<div class="grid grid-3">' + accCards + '</div>');
+                    content = '<div class="section-header"><h2 class="section-title">Accounts</h2><button class="btn-add" onclick="connectBankAccount()">+ Add Account</button></div>' +
+                        (accounts.length === 0 ? '<div class="card empty-state"><h3>No accounts connected</h3><p>Connect your bank account with Plaid</p></div>' : '<div class="grid grid-3">' + accCards + '</div>');
                 } else if (activeTab === 'analytics') {
                     var totalSpent = 0;
                     for (var p = 0; p < budgets.length; p++) {
@@ -1311,6 +1311,7 @@
         window.handleGoogleSignIn = handleGoogleSignIn;
         window.addTransaction = addTransaction;
         window.saveAccount = saveAccount;
+        window.connectBankAccount = connectBankAccount;
         window.render = render;
         
         // Make Firebase functions globally accessible
