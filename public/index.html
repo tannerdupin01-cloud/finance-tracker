@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Tracker - Take Control of Your Money</title>
+    <title>DoughMain - Take Control of Your Money</title>
     <style>
         * {
             margin: 0;
@@ -1457,7 +1457,7 @@
                         },
                         env: 'sandbox',
                         product: ['transactions'],
-                        clientName: 'Finance Tracker'
+                        clientName: 'DoughMain'
                     });
                 } else {
                     showNotification('Error initializing bank connection: ' + data.error, 'error');
@@ -1620,7 +1620,7 @@
                             <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
                                 <path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/>
                             </svg>
-                            Finance Tracker
+                            DoughMain
                         </div>
                         <div class="nav-buttons">
                             <button class="btn btn-outline" onclick="showAuth(false)">Sign In</button>
@@ -1731,7 +1731,7 @@
                                 <line x1="4" x2="20" y1="15" y2="15"></line>
                             </svg>
                         </div>
-                        <h1 class="auth-title">Finance Tracker</h1>
+                        <h1 class="auth-title">DoughMain</h1>
                         <p class="auth-subtitle">Manage your money with ease</p>
                         
                         <div class="form-group">
@@ -2251,7 +2251,7 @@
                 }
 
                 appEl.innerHTML = '<header class="header"><div class="header-content">' +
-                    '<div class="header-top"><div class="logo"><svg width="32" height="32" fill="#4f46e5" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg><h1 class="logo-title">Finance Tracker</h1></div>' +
+                    '<div class="header-top"><div class="logo"><svg width="32" height="32" fill="#4f46e5" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg><h1 class="logo-title">DoughMain</h1></div>' +
                     '<div class="user-info"><span class="user-email">' + currentUser.email + '</span><button class="btn-logout" onclick="signOut(auth)">Sign Out</button></div></div>' +
                     '<nav class="nav-tabs">' +
                     '<button class="nav-tab ' + (activeTab === 'dashboard' ? 'active' : '') + '" onclick="switchTab(\'dashboard\')">Dashboard</button>' +

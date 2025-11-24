@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Deploying Finance Tracker..."
+echo "🚀 Deploying DoughMain..."
 echo ""
 
 echo "📦 Saving to GitHub..."
