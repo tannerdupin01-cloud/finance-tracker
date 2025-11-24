@@ -2476,17 +2476,10 @@
             }
         });
 
-        // Logo click handler - goes to appropriate home based on auth state
+        // Logo click handler - always goes to marketing homepage
         function goToHome() {
-            if (currentUser) {
-                // If logged in, go to dashboard
-                activeTab = 'dashboard';
-                render();
-            } else {
-                // If not logged in, go to marketing homepage
-                currentPage = 'home';
-                render();
-            }
+            currentPage = 'home';
+            render();
         }
 
         // Global function exports
