@@ -3,85 +3,679 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Tracker</title>
+    <title>Finance Tracker - Take Control of Your Money</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #f9fafb; color: #111827; }
-        .auth-container { min-height: 100vh; background: linear-gradient(to bottom right, #dbeafe, #e0e7ff); display: flex; align-items: center; justify-content: center; padding: 1rem; }
-        .auth-box { background: white; border-radius: 1rem; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); padding: 2rem; width: 100%; max-width: 28rem; }
-        .auth-icon { width: 4rem; height: 4rem; background: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; }
-        .auth-title { font-size: 1.875rem; font-weight: bold; text-align: center; margin-bottom: 0.5rem; }
-        .auth-subtitle { text-align: center; color: #6b7280; margin-bottom: 2rem; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-size: 0.875rem; font-weight: 500; color: #374151; margin-bottom: 0.5rem; }
-        input { width: 100%; padding: 0.75rem 1rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; }
-        input:focus { outline: none; border-color: #4f46e5; }
-        .btn { width: 100%; padding: 0.75rem; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-        .btn-primary { background: #4f46e5; color: white; }
-        .btn-primary:hover { background: #4338ca; }
-        .btn-secondary { background: transparent; color: #4f46e5; margin-top: 1rem; }
-        .btn-secondary:hover { background: #eef2ff; }
-        .header { background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
-        .header-content { max-width: 80rem; margin: 0 auto; padding: 1rem 1.5rem; }
-        .header-top { display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; }
-        .logo { display: flex; align-items: center; gap: 0.75rem; }
-        .logo-title { font-size: 1.5rem; font-weight: bold; }
-        .user-info { display: flex; align-items: center; gap: 1rem; }
-        .user-email { font-size: 0.875rem; color: #6b7280; }
-        .btn-logout { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: none; background: transparent; color: #374151; border-radius: 0.5rem; cursor: pointer; transition: background 0.2s; }
-        .btn-logout:hover { background: #f3f4f6; }
-        .nav-tabs { display: flex; gap: 0.25rem; border-bottom: 1px solid #e5e7eb; overflow-x: auto; }
-        .nav-tab { padding: 0.75rem 1.5rem; border: none; background: transparent; color: #6b7280; font-weight: 500; cursor: pointer; position: relative; transition: color 0.2s; white-space: nowrap; }
-        .nav-tab:hover { color: #111827; }
-        .nav-tab.active { color: #4f46e5; }
-        .nav-tab.active::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: #4f46e5; }
-        .main-content { max-width: 80rem; margin: 0 auto; padding: 2rem 1.5rem; }
-        .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
-        .grid { display: grid; gap: 1.5rem; }
-        .grid-3 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
-        .grid-2 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
-        .stat-card { display: flex; flex-direction: column; }
-        .stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem; }
-        .stat-label { font-size: 0.875rem; font-weight: 500; color: #6b7280; }
-        .stat-value { font-size: 1.875rem; font-weight: bold; }
-        .transaction-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem; border-radius: 0.5rem; transition: background 0.2s; }
-        .transaction-item:hover { background: #f9fafb; }
-        .transaction-info { display: flex; align-items: center; gap: 1rem; }
-        .transaction-icon { width: 2.5rem; height: 2.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .transaction-icon.income { background: #dcfce7; }
-        .transaction-icon.expense { background: #fee2e2; }
-        .transaction-details h4 { font-weight: 500; margin-bottom: 0.25rem; }
-        .transaction-details p { font-size: 0.875rem; color: #6b7280; }
-        .transaction-amount { font-weight: 600; }
-        .transaction-amount.income { color: #16a34a; }
-        .transaction-amount.expense { color: #dc2626; }
-        .progress-bar { width: 100%; height: 0.5rem; background: #e5e7eb; border-radius: 9999px; overflow: hidden; }
-        .progress-fill { height: 100%; transition: width 0.3s; }
-        .progress-fill.green { background: #22c55e; }
-        .progress-fill.yellow { background: #eab308; }
-        .progress-fill.red { background: #ef4444; }
-        .btn-add { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: #4f46e5; color: white; border: none; border-radius: 0.5rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-        .btn-add:hover { background: #4338ca; }
-        .form-inline { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
-        select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; }
-        .hidden { display: none; }
-        .empty-state { text-align: center; padding: 3rem; }
-        .empty-state h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
-        .empty-state p { color: #6b7280; margin-bottom: 1.5rem; }
-        .budget-card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
-        .budget-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-        .budget-title { font-size: 1.25rem; font-weight: bold; }
-        .budget-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
-        .budget-badge.green { background: #dcfce7; color: #166534; }
-        .budget-badge.yellow { background: #fef3c7; color: #854d0e; }
-        .budget-badge.red { background: #fee2e2; color: #991b1b; }
-        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; }
-        .section-title { font-size: 1.5rem; font-weight: bold; }
-        .analytics-stat { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
-        .analytics-label { font-size: 0.875rem; font-weight: 500; color: #6b7280; margin-bottom: 0.5rem; }
-        .analytics-value { font-size: 1.5rem; font-weight: bold; }
-        .add-form { background: #f9fafb; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; }
-        .account-card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 1.5rem; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f9fafb;
+            color: #111827;
+            line-height: 1.6;
+        }
+
+        /* Homepage Styles */
+        .homepage {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-outline:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(45deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: #e2e8f0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .features {
+            background: white;
+            padding: 5rem 2rem;
+        }
+
+        .features-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 3rem;
+            color: #111827;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: #f8fafc;
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 4rem;
+            height: 4rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+        }
+
+        .cta {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .cta h2 {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .cta p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            color: #e5e7eb;
+        }
+
+        /* Auth Styles */
+        .auth-container {
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #dbeafe, #e0e7ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .auth-box {
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 28rem;
+        }
+
+        .auth-icon {
+            width: 4rem;
+            height: 4rem;
+            background: #4f46e5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+
+        .auth-title {
+            font-size: 1.875rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-subtitle {
+            text-align: center;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 0.5rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #4f46e5;
+            margin-top: 1rem;
+            width: 100%;
+        }
+
+        .btn-secondary:hover {
+            background: #eef2ff;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* App Styles */
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: #374151;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #f3f4f6;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: #6b7280;
+            font-weight: 500;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: #111827;
+        }
+
+        .nav-tab.active {
+            color: #4f46e5;
+        }
+
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #4f46e5;
+        }
+
+        .main-content {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        }
+
+        .stat-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+        }
+
+        .stat-value {
+            font-size: 1.875rem;
+            font-weight: bold;
+        }
+
+        .transaction-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s;
+        }
+
+        .transaction-item:hover {
+            background: #f9fafb;
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .transaction-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .transaction-icon.income {
+            background: #dcfce7;
+        }
+
+        .transaction-icon.expense {
+            background: #fee2e2;
+        }
+
+        .transaction-details h4 {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .transaction-details p {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+        }
+
+        .transaction-amount.income {
+            color: #16a34a;
+        }
+
+        .transaction-amount.expense {
+            color: #dc2626;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.5rem;
+            background: #e5e7eb;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .progress-fill.green {
+            background: #22c55e;
+        }
+
+        .progress-fill.yellow {
+            background: #eab308;
+        }
+
+        .progress-fill.red {
+            background: #ef4444;
+        }
+
+        .btn-add {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #4338ca;
+        }
+
+        .form-inline {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+        }
+
+        .budget-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .budget-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .budget-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .budget-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .budget-badge.green {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .budget-badge.yellow {
+            background: #fef3c7;
+            color: #854d0e;
+        }
+
+        .budget-badge.red {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .analytics-stat {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        .analytics-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .add-form {
+            background: #f9fafb;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .account-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav {
+                padding: 1rem;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -114,6 +708,8 @@
             { id: 3, category: 'Transportation', limit: 300, spent: 180 }
         ];
         let accounts = [];
+        let currentPage = 'home'; // 'home', 'auth', 'app'
+        let isSignup = false;
 
         async function loadUserData() {
             if (!currentUser) return;
@@ -187,200 +783,305 @@
             return { totalBalance: totalBalance, monthlyIncome: monthlyIncome, monthlyExpenses: monthlyExpenses };
         }
 
+        function showHomepage() {
+            return `
+                <div class="homepage">
+                    <nav class="nav">
+                        <div class="nav-logo">
+                            <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                <path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/>
+                            </svg>
+                            Finance Tracker
+                        </div>
+                        <div class="nav-buttons">
+                            <button class="btn btn-outline" onclick="showAuth(false)">Sign In</button>
+                            <button class="btn btn-primary" onclick="showAuth(true)">Get Started</button>
+                        </div>
+                    </nav>
+
+                    <section class="hero">
+                        <h1>Take Control of Your Money</h1>
+                        <p>Track expenses, manage budgets, and build wealth with our intuitive finance management platform. Make every dollar count.</p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary" onclick="showAuth(true)" style="font-size: 1.125rem; padding: 1rem 2rem;">Start Free Today</button>
+                            <button class="btn btn-outline" onclick="showAuth(false)" style="font-size: 1.125rem; padding: 1rem 2rem;">Sign In</button>
+                        </div>
+                    </section>
+                </div>
+
+                <section class="features">
+                    <div class="features-container">
+                        <h2>Everything You Need to Manage Your Finances</h2>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                                        <polyline points="16 7 22 7 22 13"></polyline>
+                                    </svg>
+                                </div>
+                                <h3>Track Expenses</h3>
+                                <p>Monitor your spending with detailed transaction tracking and categorization. See exactly where your money goes.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                </div>
+                                <h3>Budget Management</h3>
+                                <p>Set spending limits for different categories and get alerts when you're approaching your budget.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                        <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+                                        <line x1="2" x2="22" y1="10" y2="10"></line>
+                                    </svg>
+                                </div>
+                                <h3>Bank Integration</h3>
+                                <p>Connect your bank accounts securely to automatically sync transactions and balances.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                        <path d="M3 3v18h18"></path>
+                                        <path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"></path>
+                                    </svg>
+                                </div>
+                                <h3>Financial Analytics</h3>
+                                <p>Get insights into your spending patterns with detailed reports and visualizations.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+                                        <rect width="8" height="4" x="8" y="2" rx="1" ry="1"></rect>
+                                    </svg>
+                                </div>
+                                <h3>Goal Setting</h3>
+                                <p>Set financial goals and track your progress towards saving for that vacation or emergency fund.</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                                    </svg>
+                                </div>
+                                <h3>Secure & Private</h3>
+                                <p>Your financial data is encrypted and secure. We never sell your information to third parties.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cta">
+                    <h2>Ready to Take Control?</h2>
+                    <p>Join thousands of users who have transformed their financial lives with Finance Tracker.</p>
+                    <button class="btn btn-primary" onclick="showAuth(true)" style="font-size: 1.125rem; padding: 1rem 2rem;">Start Your Journey Today</button>
+                </section>
+            `;
+        }
+
+        function showAuthPage() {
+            return `
+                <button class="back-btn" onclick="showHome()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                    Back to Home
+                </button>
+                <div class="auth-container">
+                    <div class="auth-box">
+                        <div class="auth-icon">
+                            <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
+                                <path d="M21 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v1"></path>
+                                <polyline points="15 10 20 15 15 20"></polyline>
+                                <line x1="4" x2="20" y1="15" y2="15"></line>
+                            </svg>
+                        </div>
+                        <h1 class="auth-title">Finance Tracker</h1>
+                        <p class="auth-subtitle">Manage your money with ease</p>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="email" placeholder="you@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="password" placeholder="••••••••">
+                        </div>
+                        <button class="btn btn-primary" onclick="handleAuth()">${isSignup ? 'Create Account' : 'Sign In'}</button>
+                        <button class="btn btn-secondary" onclick="toggleAuth()">${isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAuth(signup = false) {
+            currentPage = 'auth';
+            isSignup = signup;
+            render();
+        }
+
+        function showHome() {
+            currentPage = 'home';
+            render();
+        }
+
+        function toggleAuth() {
+            isSignup = !isSignup;
+            render();
+        }
+
+        function handleAuth() {
+            var email = document.getElementById('email').value.trim();
+            var password = document.getElementById('password').value;
+            if (!email || !password) { 
+                alert('Please fill in all fields'); 
+                return; 
+            }
+            
+            if (isSignup) {
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then(function(result) {
+                        return setDoc(doc(db, 'users', result.user.uid), { email: email, createdAt: new Date() });
+                    })
+                    .catch(function(error) {
+                        alert('Signup failed: ' + error.message);
+                    });
+            } else {
+                signInWithEmailAndPassword(auth, email, password)
+                    .catch(function(error) {
+                        alert('Login failed: ' + error.message);
+                    });
+            }
+        }
+
         function render() {
             var appEl = document.getElementById('app');
             
-            if (!currentUser) {
-                var isSignup = window.isSignup || false;
-                appEl.innerHTML = '<div class="auth-container"><div class="auth-box">' +
-                    '<div class="auth-icon"><svg width="32" height="32" fill="white" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg></div>' +
-                    '<h1 class="auth-title">Finance Tracker</h1>' +
-                    '<p class="auth-subtitle">Manage your money with ease</p>' +
-                    '<div class="form-group"><label>Email</label><input type="email" id="email" placeholder="you@example.com"></div>' +
-                    '<div class="form-group"><label>Password</label><input type="password" id="password" placeholder="••••••••"></div>' +
-                    '<button class="btn btn-primary" id="authBtn">' + (isSignup ? 'Create Account' : 'Sign In') + '</button>' +
-                    '<button class="btn btn-secondary" id="toggleBtn">' + (isSignup ? 'Already have an account? Sign in' : "Don't have an account? Sign up") + '</button>' +
-                    '</div></div>';
+            if (currentUser) {
+                // Show the main finance application
+                var stats = getStats();
+                var content = '';
                 
-                document.getElementById('authBtn').onclick = function() {
-                    var email = document.getElementById('email').value.trim();
-                    var password = document.getElementById('password').value;
-                    if (!email || !password) { alert('Please fill in all fields'); return; }
-                    
-                    if (window.isSignup) {
-                        createUserWithEmailAndPassword(auth, email, password)
-                            .then(function(result) {
-                                return setDoc(doc(db, 'users', result.user.uid), { email: email, createdAt: new Date() });
-                            })
-                            .catch(function(error) {
-                                alert('Signup failed: ' + error.message);
-                            });
-                    } else {
-                        signInWithEmailAndPassword(auth, email, password)
-                            .catch(function(error) {
-                                alert('Login failed: ' + error.message);
-                            });
+                if (activeTab === 'dashboard') {
+                    var txList = '';
+                    var limit = Math.min(5, transactions.length);
+                    for (var i = 0; i < limit; i++) {
+                        var t = transactions[i];
+                        var amt = t.amount || 0;
+                        txList += '<div class="transaction-item"><div class="transaction-info"><div class="transaction-icon ' + t.type + '"></div><div class="transaction-details"><h4>' + (t.description || 'Unknown') + '</h4><p>' + (t.category || '') + '</p></div></div><div class="transaction-amount ' + t.type + '">' + (amt > 0 ? '+' : '') + '$' + amt.toFixed(2) + '</div></div>';
                     }
-                };
-                
-                document.getElementById('toggleBtn').onclick = function() {
-                    window.isSignup = !window.isSignup;
-                    render();
-                };
-                
-                document.getElementById('password').onkeypress = function(e) {
-                    if (e.key === 'Enter') { document.getElementById('authBtn').click(); }
-                };
-                
-                return;
-            }
+                    if (transactions.length === 0) {
+                        txList = '<p style="color:#6b7280">No transactions yet</p>';
+                    }
+                    
+                    var budgetList = '';
+                    for (var j = 0; j < budgets.length; j++) {
+                        var b = budgets[j];
+                        var pct = ((b.spent || 0) / (b.limit || 1)) * 100;
+                        var color = pct > 90 ? 'red' : pct > 70 ? 'yellow' : 'green';
+                        budgetList += '<div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span>' + b.category + '</span><span>$' + (b.spent || 0) + '/$' + (b.limit || 0) + '</span></div><div class="progress-bar"><div class="progress-fill ' + color + '" style="width:' + Math.min(pct, 100) + '%"></div></div></div>';
+                    }
+                    
+                    content = '<div class="grid grid-3">' +
+                        '<div class="card stat-card"><div class="stat-header"><span class="stat-label">Total Balance</span></div><div class="stat-value">$' + stats.totalBalance.toFixed(2) + '</div></div>' +
+                        '<div class="card stat-card"><div class="stat-header"><span class="stat-label">Monthly Income</span></div><div class="stat-value" style="color:#16a34a">$' + stats.monthlyIncome.toFixed(2) + '</div></div>' +
+                        '<div class="card stat-card"><div class="stat-header"><span class="stat-label">Monthly Expenses</span></div><div class="stat-value" style="color:#dc2626">$' + stats.monthlyExpenses.toFixed(2) + '</div></div>' +
+                        '</div><div class="grid grid-2">' +
+                        '<div class="card"><h2 style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem">Recent Transactions</h2>' + txList + '</div>' +
+                        '<div class="card"><h2 style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem">Budget Overview</h2>' + budgetList + '</div>' +
+                        '</div>';
+                } else if (activeTab === 'transactions') {
+                    var txItems = '';
+                    for (var k = 0; k < transactions.length; k++) {
+                        var tx = transactions[k];
+                        var txAmt = tx.amount || 0;
+                        txItems += '<div class="transaction-item"><div class="transaction-info"><div class="transaction-icon ' + tx.type + '"></div><div class="transaction-details"><h4>' + (tx.description || 'Unknown') + '</h4><p>' + (tx.date || '') + ' • ' + (tx.category || '') + '</p></div></div><div class="transaction-amount ' + tx.type + '">' + (txAmt > 0 ? '+$' : '-$') + Math.abs(txAmt).toFixed(2) + '</div></div>';
+                    }
+                    if (transactions.length === 0) {
+                        txItems = '<div class="empty-state"><h3>No transactions</h3><p>Add your first transaction</p></div>';
+                    }
+                    
+                    content = '<div class="card">' +
+                        '<div class="section-header"><h2 class="section-title">All Transactions</h2><button class="btn-add" onclick="document.getElementById(\'txForm\').classList.toggle(\'hidden\');">+ Add</button></div>' +
+                        '<div id="txForm" class="add-form hidden">' +
+                        '<div class="form-inline"><input type="text" id="txDesc" placeholder="Description"><input type="number" id="txAmount" placeholder="Amount" step="0.01"><select id="txCategory"><option>Groceries</option><option>Entertainment</option><option>Transportation</option><option>Income</option></select><select id="txType"><option value="expense">Expense</option><option value="income">Income</option></select></div>' +
+                        '<button class="btn btn-primary" onclick="addTransaction()">Add Transaction</button></div>' +
+                        txItems + '</div>';
+                } else if (activeTab === 'budgets') {
+                    var budgetCards = '';
+                    for (var m = 0; m < budgets.length; m++) {
+                        var bg = budgets[m];
+                        var bgPct = ((bg.spent || 0) / (bg.limit || 1)) * 100;
+                        var bgColor = bgPct > 90 ? 'red' : bgPct > 70 ? 'yellow' : 'green';
+                        var remaining = (bg.limit || 0) - (bg.spent || 0);
+                        budgetCards += '<div class="budget-card"><div class="budget-header"><h3 class="budget-title">' + bg.category + '</h3><span class="budget-badge ' + bgColor + '">' + bgPct.toFixed(0) + '%</span></div><div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;font-size:0.875rem;color:#6b7280;margin-bottom:0.5rem"><span>$' + (bg.spent || 0) + '</span><span>$' + (bg.limit || 0) + '</span></div><div class="progress-bar" style="height:0.75rem"><div class="progress-fill ' + bgColor + '" style="width:' + Math.min(bgPct, 100) + '%"></div></div></div><div style="padding-top:1rem;border-top:1px solid #e5e7eb;font-size:0.875rem">Remaining: <strong>$' + remaining.toFixed(2) + '</strong></div></div>';
+                    }
+                    content = '<div class="grid grid-2">' + budgetCards + '</div>';
+                } else if (activeTab === 'accounts') {
+                    var accCards = '';
+                    for (var n = 0; n < accounts.length; n++) {
+                        var ac = accounts[n];
+                        accCards += '<div class="account-card"><h3 style="font-weight:600;margin-bottom:0.5rem">' + (ac.name || 'Account') + '</h3><p style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:0.5rem">' + (ac.type || '') + '</p><p style="font-size:1.875rem;font-weight:bold;color:#4f46e5">$' + (ac.balance || 0).toFixed(2) + '</p></div>';
+                    }
+                    content = '<div class="section-header"><h2 class="section-title">Accounts</h2><button class="btn-add" onclick="saveAccount()">+ Connect</button></div>' +
+                        (accounts.length === 0 ? '<div class="card empty-state"><h3>No accounts connected</h3><p>Connect your bank account</p></div>' : '<div class="grid grid-3">' + accCards + '</div>');
+                } else if (activeTab === 'analytics') {
+                    var totalSpent = 0;
+                    for (var p = 0; p < budgets.length; p++) {
+                        totalSpent += budgets[p].spent || 0;
+                    }
+                    if (totalSpent === 0) totalSpent = 1;
+                    
+                    var catList = '';
+                    for (var q = 0; q < budgets.length; q++) {
+                        var catPct = ((budgets[q].spent || 0) / totalSpent) * 100;
+                        catList += '<div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;margin-bottom:0.5rem"><span>' + budgets[q].category + '</span><span style="font-weight:600">' + catPct.toFixed(1) + '%</span></div><div class="progress-bar"><div class="progress-fill" style="background:#4f46e5;width:' + catPct + '%"></div></div></div>';
+                    }
+                    
+                    var expenseCount = 0;
+                    for (var r = 0; r < transactions.length; r++) {
+                        if (transactions[r].type === 'expense') expenseCount++;
+                    }
+                    var avgTx = expenseCount > 0 ? stats.monthlyExpenses / expenseCount : 0;
+                    var netCash = stats.monthlyIncome - stats.monthlyExpenses;
+                    
+                    content = '<div class="card"><h2 class="section-title" style="margin-bottom:1.5rem">Spending by Category</h2>' + catList + '</div>' +
+                        '<div class="grid grid-3" style="margin-top:1.5rem">' +
+                        '<div class="analytics-stat"><h3 class="analytics-label">Avg Transaction</h3><p class="analytics-value">$' + avgTx.toFixed(2) + '</p></div>' +
+                        '<div class="analytics-stat"><h3 class="analytics-label">Total Transactions</h3><p class="analytics-value">' + transactions.length + '</p></div>' +
+                        '<div class="analytics-stat"><h3 class="analytics-label">Net Cash Flow</h3><p class="analytics-value" style="color:' + (netCash >= 0 ? '#16a34a' : '#dc2626') + '">$' + netCash.toFixed(2) + '</p></div></div>';
+                }
 
-            var stats = getStats();
-            var content = '';
-            
-            if (activeTab === 'dashboard') {
-                var txList = '';
-                var limit = Math.min(5, transactions.length);
-                for (var i = 0; i < limit; i++) {
-                    var t = transactions[i];
-                    var amt = t.amount || 0;
-                    txList += '<div class="transaction-item"><div class="transaction-info"><div class="transaction-icon ' + t.type + '"></div><div class="transaction-details"><h4>' + (t.description || 'Unknown') + '</h4><p>' + (t.category || '') + '</p></div></div><div class="transaction-amount ' + t.type + '">' + (amt > 0 ? '+' : '') + '$' + amt.toFixed(2) + '</div></div>';
-                }
-                if (transactions.length === 0) {
-                    txList = '<p style="color:#6b7280">No transactions yet</p>';
-                }
-                
-                var budgetList = '';
-                for (var j = 0; j < budgets.length; j++) {
-                    var b = budgets[j];
-                    var pct = ((b.spent || 0) / (b.limit || 1)) * 100;
-                    var color = pct > 90 ? 'red' : pct > 70 ? 'yellow' : 'green';
-                    budgetList += '<div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;font-size:0.875rem;margin-bottom:0.5rem"><span>' + b.category + '</span><span>$' + (b.spent || 0) + '/$' + (b.limit || 0) + '</span></div><div class="progress-bar"><div class="progress-fill ' + color + '" style="width:' + Math.min(pct, 100) + '%"></div></div></div>';
-                }
-                
-                content = '<div class="grid grid-3">' +
-                    '<div class="card stat-card"><div class="stat-header"><span class="stat-label">Total Balance</span></div><div class="stat-value">$' + stats.totalBalance.toFixed(2) + '</div></div>' +
-                    '<div class="card stat-card"><div class="stat-header"><span class="stat-label">Monthly Income</span></div><div class="stat-value" style="color:#16a34a">$' + stats.monthlyIncome.toFixed(2) + '</div></div>' +
-                    '<div class="card stat-card"><div class="stat-header"><span class="stat-label">Monthly Expenses</span></div><div class="stat-value" style="color:#dc2626">$' + stats.monthlyExpenses.toFixed(2) + '</div></div>' +
-                    '</div><div class="grid grid-2">' +
-                    '<div class="card"><h2 style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem">Recent Transactions</h2>' + txList + '</div>' +
-                    '<div class="card"><h2 style="font-size:1.25rem;font-weight:bold;margin-bottom:1rem">Budget Overview</h2>' + budgetList + '</div>' +
-                    '</div>';
-            } else if (activeTab === 'transactions') {
-                var txItems = '';
-                for (var k = 0; k < transactions.length; k++) {
-                    var tx = transactions[k];
-                    var txAmt = tx.amount || 0;
-                    txItems += '<div class="transaction-item"><div class="transaction-info"><div class="transaction-icon ' + tx.type + '"></div><div class="transaction-details"><h4>' + (tx.description || 'Unknown') + '</h4><p>' + (tx.date || '') + ' • ' + (tx.category || '') + '</p></div></div><div class="transaction-amount ' + tx.type + '">' + (txAmt > 0 ? '+$' : '-$') + Math.abs(txAmt).toFixed(2) + '</div></div>';
-                }
-                if (transactions.length === 0) {
-                    txItems = '<div class="empty-state"><h3>No transactions</h3><p>Add your first transaction</p></div>';
-                }
-                
-                content = '<div class="card">' +
-                    '<div class="section-header"><h2 class="section-title">All Transactions</h2><button class="btn-add" id="toggleTxForm">+ Add</button></div>' +
-                    '<div id="txForm" class="add-form hidden">' +
-                    '<div class="form-inline"><input type="text" id="txDesc" placeholder="Description"><input type="number" id="txAmount" placeholder="Amount" step="0.01"><select id="txCategory"><option>Groceries</option><option>Entertainment</option><option>Transportation</option><option>Income</option></select><select id="txType"><option value="expense">Expense</option><option value="income">Income</option></select></div>' +
-                    '<button class="btn btn-primary" id="addTxBtn">Add Transaction</button></div>' +
-                    txItems + '</div>';
-            } else if (activeTab === 'budgets') {
-                var budgetCards = '';
-                for (var m = 0; m < budgets.length; m++) {
-                    var bg = budgets[m];
-                    var bgPct = ((bg.spent || 0) / (bg.limit || 1)) * 100;
-                    var bgColor = bgPct > 90 ? 'red' : bgPct > 70 ? 'yellow' : 'green';
-                    var remaining = (bg.limit || 0) - (bg.spent || 0);
-                    budgetCards += '<div class="budget-card"><div class="budget-header"><h3 class="budget-title">' + bg.category + '</h3><span class="budget-badge ' + bgColor + '">' + bgPct.toFixed(0) + '%</span></div><div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;font-size:0.875rem;color:#6b7280;margin-bottom:0.5rem"><span>$' + (bg.spent || 0) + '</span><span>$' + (bg.limit || 0) + '</span></div><div class="progress-bar" style="height:0.75rem"><div class="progress-fill ' + bgColor + '" style="width:' + Math.min(bgPct, 100) + '%"></div></div></div><div style="padding-top:1rem;border-top:1px solid #e5e7eb;font-size:0.875rem">Remaining: <strong>$' + remaining.toFixed(2) + '</strong></div></div>';
-                }
-                content = '<div class="grid grid-2">' + budgetCards + '</div>';
-            } else if (activeTab === 'accounts') {
-                var accCards = '';
-                for (var n = 0; n < accounts.length; n++) {
-                    var ac = accounts[n];
-                    accCards += '<div class="account-card"><h3 style="font-weight:600;margin-bottom:0.5rem">' + (ac.name || 'Account') + '</h3><p style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:0.5rem">' + (ac.type || '') + '</p><p style="font-size:1.875rem;font-weight:bold;color:#4f46e5">$' + (ac.balance || 0).toFixed(2) + '</p></div>';
-                }
-                content = '<div class="section-header"><h2 class="section-title">Accounts</h2><button class="btn-add" id="connectBtn">+ Connect</button></div>' +
-                    (accounts.length === 0 ? '<div class="card empty-state"><h3>No accounts connected</h3><p>Connect your bank account</p></div>' : '<div class="grid grid-3">' + accCards + '</div>');
-            } else if (activeTab === 'analytics') {
-                var totalSpent = 0;
-                for (var p = 0; p < budgets.length; p++) {
-                    totalSpent += budgets[p].spent || 0;
-                }
-                if (totalSpent === 0) totalSpent = 1;
-                
-                var catList = '';
-                for (var q = 0; q < budgets.length; q++) {
-                    var catPct = ((budgets[q].spent || 0) / totalSpent) * 100;
-                    catList += '<div style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;margin-bottom:0.5rem"><span>' + budgets[q].category + '</span><span style="font-weight:600">' + catPct.toFixed(1) + '%</span></div><div class="progress-bar"><div class="progress-fill" style="background:#4f46e5;width:' + catPct + '%"></div></div></div>';
-                }
-                
-                var expenseCount = 0;
-                for (var r = 0; r < transactions.length; r++) {
-                    if (transactions[r].type === 'expense') expenseCount++;
-                }
-                var avgTx = expenseCount > 0 ? stats.monthlyExpenses / expenseCount : 0;
-                var netCash = stats.monthlyIncome - stats.monthlyExpenses;
-                
-                content = '<div class="card"><h2 class="section-title" style="margin-bottom:1.5rem">Spending by Category</h2>' + catList + '</div>' +
-                    '<div class="grid grid-3" style="margin-top:1.5rem">' +
-                    '<div class="analytics-stat"><h3 class="analytics-label">Avg Transaction</h3><p class="analytics-value">$' + avgTx.toFixed(2) + '</p></div>' +
-                    '<div class="analytics-stat"><h3 class="analytics-label">Total Transactions</h3><p class="analytics-value">' + transactions.length + '</p></div>' +
-                    '<div class="analytics-stat"><h3 class="analytics-label">Net Cash Flow</h3><p class="analytics-value" style="color:' + (netCash >= 0 ? '#16a34a' : '#dc2626') + '">$' + netCash.toFixed(2) + '</p></div></div>';
+                appEl.innerHTML = '<header class="header"><div class="header-content">' +
+                    '<div class="header-top"><div class="logo"><svg width="32" height="32" fill="#4f46e5" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg><h1 class="logo-title">Finance Tracker</h1></div>' +
+                    '<div class="user-info"><span class="user-email">' + currentUser.email + '</span><button class="btn-logout" onclick="signOut(auth)">Sign Out</button></div></div>' +
+                    '<nav class="nav-tabs">' +
+                    '<button class="nav-tab ' + (activeTab === 'dashboard' ? 'active' : '') + '" onclick="activeTab = \'dashboard\'; render();">Dashboard</button>' +
+                    '<button class="nav-tab ' + (activeTab === 'transactions' ? 'active' : '') + '" onclick="activeTab = \'transactions\'; render();">Transactions</button>' +
+                    '<button class="nav-tab ' + (activeTab === 'budgets' ? 'active' : '') + '" onclick="activeTab = \'budgets\'; render();">Budgets</button>' +
+                    '<button class="nav-tab ' + (activeTab === 'accounts' ? 'active' : '') + '" onclick="activeTab = \'accounts\'; render();">Accounts</button>' +
+                    '<button class="nav-tab ' + (activeTab === 'analytics' ? 'active' : '') + '" onclick="activeTab = \'analytics\'; render();">Analytics</button>' +
+                    '</nav></div></header>' +
+                    '<main class="main-content">' + content + '</main>';
+            } else if (currentPage === 'auth') {
+                appEl.innerHTML = showAuthPage();
+            } else {
+                appEl.innerHTML = showHomepage();
             }
+        }
 
-            appEl.innerHTML = '<header class="header"><div class="header-content">' +
-                '<div class="header-top"><div class="logo"><svg width="32" height="32" fill="#4f46e5" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg><h1 class="logo-title">Finance Tracker</h1></div>' +
-                '<div class="user-info"><span class="user-email">' + currentUser.email + '</span><button class="btn-logout" id="logoutBtn">Sign Out</button></div></div>' +
-                '<nav class="nav-tabs">' +
-                '<button class="nav-tab ' + (activeTab === 'dashboard' ? 'active' : '') + '" data-tab="dashboard">Dashboard</button>' +
-                '<button class="nav-tab ' + (activeTab === 'transactions' ? 'active' : '') + '" data-tab="transactions">Transactions</button>' +
-                '<button class="nav-tab ' + (activeTab === 'budgets' ? 'active' : '') + '" data-tab="budgets">Budgets</button>' +
-                '<button class="nav-tab ' + (activeTab === 'accounts' ? 'active' : '') + '" data-tab="accounts">Accounts</button>' +
-                '<button class="nav-tab ' + (activeTab === 'analytics' ? 'active' : '') + '" data-tab="analytics">Analytics</button>' +
-                '</nav></div></header>' +
-                '<main class="main-content">' + content + '</main>';
-
-            // Add event listeners
-            document.getElementById('logoutBtn').onclick = function() {
-                signOut(auth);
-            };
-            
-            var tabs = document.querySelectorAll('.nav-tab');
-            for (var w = 0; w < tabs.length; w++) {
-                tabs[w].onclick = function() {
-                    activeTab = this.getAttribute('data-tab');
-                    render();
-                };
-            }
-
-            // Transaction form toggle
-            var toggleTxForm = document.getElementById('toggleTxForm');
-            if (toggleTxForm) {
-                toggleTxForm.onclick = function() {
-                    document.getElementById('txForm').classList.toggle('hidden');
-                };
-            }
-            
-            // Add transaction button
-            var addTxBtn = document.getElementById('addTxBtn');
-            if (addTxBtn) {
-                addTxBtn.onclick = function() {
-                    var desc = document.getElementById('txDesc').value.trim();
-                    var amount = document.getElementById('txAmount').value;
-                    var category = document.getElementById('txCategory').value;
-                    var type = document.getElementById('txType').value;
-                    if (!desc || !amount) { alert('Fill all fields'); return; }
-                    saveTransaction(desc, amount, category, type);
-                };
-            }
-
-            // Connect account button
-            var connectBtn = document.getElementById('connectBtn');
-            if (connectBtn) {
-                connectBtn.onclick = function() {
-                    saveAccount();
-                };
-            }
+        function addTransaction() {
+            var desc = document.getElementById('txDesc').value.trim();
+            var amount = document.getElementById('txAmount').value;
+            var category = document.getElementById('txCategory').value;
+            var type = document.getElementById('txType').value;
+            if (!desc || !amount) { alert('Fill all fields'); return; }
+            saveTransaction(desc, amount, category, type);
         }
 
         // Listen for auth state changes
@@ -397,6 +1098,16 @@
                 render();
             }
         });
+
+        // Make functions globally accessible
+        window.showAuth = showAuth;
+        window.showHome = showHome;
+        window.toggleAuth = toggleAuth;
+        window.handleAuth = handleAuth;
+        window.addTransaction = addTransaction;
+        window.activeTab = activeTab;
+        window.render = render;
+        window.saveAccount = saveAccount;
     </script>
 </body>
 </html>
