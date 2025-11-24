@@ -16,7 +16,7 @@ function getPlaidClient() {
     }
     
     const configuration = new Configuration({
-      basePath: PlaidEnvironments.sandbox, // Change to production when ready
+      basePath: PlaidEnvironments.sandbox, // Sandbox environment for testing
       baseOptions: {
         headers: {
           'PLAID-CLIENT-ID': config.plaid.client_id,
