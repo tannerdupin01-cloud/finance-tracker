@@ -721,6 +721,7 @@
 <body>
     <div id="app"></div>
 
+    <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
@@ -790,21 +791,150 @@
             }
         }
 
-        async function saveAccount() {
+        // Plaid Link Integration
+        let plaidHandler = null;
+
+        async function initPlaidLink() {
             if (!currentUser) return;
+            
             try {
-                await addDoc(collection(db, 'users', currentUser.uid, 'accounts'), {
-                    name: 'Chase Checking',
-                    type: 'checking',
-                    balance: 5430.25,
-                    createdAt: new Date()
+                // Call Firebase Function to create link token
+                const response = await fetch('https://us-central1-finance-d472d.cloudfunctions.net/createLinkToken', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.uid
+                    })
                 });
-                await loadUserData();
-                alert('Account connected!');
-                render();
+
+                const data = await response.json();
+                
+                if (data.link_token) {
+                    // Initialize Plaid Link
+                    plaidHandler = Plaid.create({
+                        token: data.link_token,
+                        onSuccess: async function(public_token, metadata) {
+                            console.log('Plaid Link successful!', metadata);
+                            
+                            // Exchange public token for access token
+                            const exchangeResponse = await fetch('https://us-central1-finance-d472d.cloudfunctions.net/exchangePublicToken', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    public_token: public_token,
+                                    user_id: currentUser.uid
+                                })
+                            });
+
+                            const exchangeData = await exchangeResponse.json();
+                            
+                            if (exchangeData.success) {
+                                alert('Bank account connected successfully!');
+                                await loadUserData();
+                                await fetchPlaidTransactions();
+                                render();
+                            } else {
+                                alert('Error connecting account: ' + exchangeData.error);
+                            }
+                        },
+                        onLoad: function() {
+                            console.log('Plaid Link loaded');
+                        },
+                        onExit: function(err, metadata) {
+                            console.log('Plaid Link exited', err, metadata);
+                        },
+                        onEvent: function(eventName, metadata) {
+                            console.log('Plaid Link event', eventName, metadata);
+                        },
+                        env: 'sandbox', // Change to 'production' when ready
+                        product: ['transactions'],
+                        clientName: 'Finance Tracker'
+                    });
+                } else {
+                    alert('Error initializing bank connection: ' + data.error);
+                }
             } catch (error) {
-                alert('Error: ' + error.message);
+                console.error('Error initializing Plaid Link:', error);
+                alert('Error connecting to bank: ' + error.message);
             }
+        }
+
+        async function connectBankAccount() {
+            if (plaidHandler) {
+                plaidHandler.open();
+            } else {
+                await initPlaidLink();
+                if (plaidHandler) {
+                    plaidHandler.open();
+                }
+            }
+        }
+
+        async function fetchPlaidTransactions() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch('https://us-central1-finance-d472d.cloudfunctions.net/fetchTransactions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.uid,
+                        start_date: '2024-01-01',
+                        end_date: new Date().toISOString().split('T')[0]
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('Fetched ' + data.count + ' transactions from Plaid');
+                    await loadUserData(); // Reload to get the new transactions
+                    render();
+                } else {
+                    console.error('Error fetching transactions:', data.error);
+                }
+            } catch (error) {
+                console.error('Error fetching Plaid transactions:', error);
+            }
+        }
+
+        async function updateAccountBalances() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch('https://us-central1-finance-d472d.cloudfunctions.net/updateBalances', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: currentUser.uid
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('Account balances updated');
+                    await loadUserData();
+                    render();
+                } else {
+                    console.error('Error updating balances:', data.error);
+                }
+            } catch (error) {
+                console.error('Error updating account balances:', error);
+            }
+        }
+
+        // Legacy function for manual transaction entry
+        async function saveAccount() {
+            connectBankAccount();
         }
 
         function getStats() {
