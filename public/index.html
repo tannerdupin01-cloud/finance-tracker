@@ -1616,7 +1616,7 @@
             return `
                 <div class="homepage">
                     <nav class="nav">
-                        <div class="nav-logo">
+                        <div class="nav-logo" style="cursor: pointer;" onclick="showHome()">
                             <svg width="32" height="32" fill="white" viewBox="0 0 24 24">
                                 <path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/>
                             </svg>
@@ -1629,8 +1629,9 @@
                     </nav>
 
                     <section class="hero">
-                        <h1>Take Control of Your Money</h1>
-                        <p>Track expenses, manage budgets, set goals, and build wealth with our comprehensive finance management platform. Make every dollar count.</p>
+                        <h1>Transform Your Financial Future</h1>
+                        <p style="font-size: 1.5rem; margin-bottom: 1rem; line-height: 1.4;">Your journey to financial freedom starts here. Track every dollar, crush your goals, and build the wealth you deserve.</p>
+                        <p style="font-size: 1.125rem; margin-bottom: 2.5rem; opacity: 0.9;">Join thousands who've taken control of their finances with DoughMain - where smart money management meets beautiful design.</p>
                         <div class="hero-buttons">
                             <button class="btn btn-primary" onclick="showAuth(true)" style="font-size: 1.125rem; padding: 1rem 2rem;">Start Free Today</button>
                             <button class="btn btn-outline" onclick="showAuth(false)" style="font-size: 1.125rem; padding: 1rem 2rem;">Sign In</button>
@@ -2251,7 +2252,7 @@
                 }
 
                 appEl.innerHTML = '<header class="header"><div class="header-content">' +
-                    '<div class="header-top"><div class="logo"><svg width="32" height="32" fill="#4f46e5" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg><h1 class="logo-title">DoughMain</h1></div>' +
+                    '<div class="header-top"><div class="logo" style="cursor: pointer;" onclick="showHome()"><svg width="32" height="32" fill="#4f46e5" viewBox="0 0 24 24"><path d="M19 14V6c0-1.1-.9-2-2-2H3c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zm-9-1c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm13-6v11c0 1.1-.9 2-2 2H4v-2h17V7h2z"/></svg><h1 class="logo-title">DoughMain</h1></div>' +
                     '<div class="user-info"><span class="user-email">' + currentUser.email + '</span><button class="btn-logout" onclick="signOut(auth)">Sign Out</button></div></div>' +
                     '<nav class="nav-tabs">' +
                     '<button class="nav-tab ' + (activeTab === 'dashboard' ? 'active' : '') + '" onclick="switchTab(\'dashboard\')">Dashboard</button>' +
