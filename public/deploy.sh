@@ -1,1 +1,16 @@
-cat > deploy.sh << 'EOF' #!/bin/bash echo "🚀 Deploying Finance Tracker..." echo "" echo "📦 Saving to GitHub..." git add . git commit -m "Update: $(date)" git push echo "" echo "🔥 Deploying to Firebase..." firebase deploy echo "" echo "✅ Done! https://finance-d472d.web.app" EOF 
+#!/bin/bash
+
+echo "🚀 Deploying Finance Tracker..."
+echo ""
+
+echo "📦 Saving to GitHub..."
+git add .
+git commit -m "Update: $(date)"
+git push
+
+echo ""
+echo "🔥 Deploying to Firebase..."
+firebase deploy
+
+echo ""
+echo "✅ Done! https://finance-d472d.web.app"
