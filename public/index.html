@@ -1081,6 +1081,7 @@
         const googleProvider = new GoogleAuthProvider();
 
         let currentUser = null;
+        let isAdmin = false;
         let activeTab = 'dashboard';
         let transactions = [];
         let budgets = [
@@ -2261,6 +2262,80 @@
                         <button class="btn btn-primary" onclick="addLifeGoal()">Add Life Goal</button>
                     </div>
                     <div class="grid grid-2">${lifeGoalCards || '<div class="empty-state"><h3>No life goals yet</h3><p>Create your first life goal to organize your personal development</p></div>'}</div>`;
+                
+                } else if (activeTab === 'admin' && isAdmin) {
+                    // Admin dashboard content
+                    content = `
+                        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 2rem;">
+                            <h2 style="font-size: 2rem; font-weight: bold; margin-bottom: 0.5rem;">🛡️ Admin Dashboard</h2>
+                            <p style="opacity: 0.9;">Manage users, content, and platform settings</p>
+                        </div>
+
+                        <div class="section-header">
+                            <h2 class="section-title">Platform Statistics</h2>
+                            <button class="btn btn-primary btn-small" onclick="loadPlatformStats()">Refresh Stats</button>
+                        </div>
+                        
+                        <div id="platformStats" class="grid grid-4">
+                            <div class="card stat-card">
+                                <div class="stat-header"><span class="stat-label">Total Users</span></div>
+                                <div class="stat-value" id="statTotalUsers">-</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-header"><span class="stat-label">Active Users</span></div>
+                                <div class="stat-value" id="statActiveUsers" style="color: #16a34a">-</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-header"><span class="stat-label">Total Transactions</span></div>
+                                <div class="stat-value" id="statTransactions">-</div>
+                            </div>
+                            <div class="card stat-card">
+                                <div class="stat-header"><span class="stat-label">Connected Accounts</span></div>
+                                <div class="stat-value" id="statAccounts">-</div>
+                            </div>
+                        </div>
+
+                        <div class="section-header" style="margin-top: 2rem;">
+                            <h2 class="section-title">Quick Actions</h2>
+                        </div>
+                        
+                        <div class="grid grid-3">
+                            <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="window.open('admin-customize.html', '_blank')">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">🎨</div>
+                                    <div>
+                                        <h3 style="font-weight: 600; margin-bottom: 0.25rem;">Customize Site</h3>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">Colors, branding, and content</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="loadUserManagement()">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">👥</div>
+                                    <div>
+                                        <h3 style="font-weight: 600; margin-bottom: 0.25rem;">Manage Users</h3>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">View and control user access</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card" style="cursor: pointer; transition: transform 0.2s;" onclick="window.open('ADMIN_SETUP.md', '_blank')">
+                                <div style="display: flex; align-items: center; gap: 1rem;">
+                                    <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">📚</div>
+                                    <div>
+                                        <h3 style="font-weight: 600; margin-bottom: 0.25rem;">Documentation</h3>
+                                        <p style="font-size: 0.875rem; color: #6b7280;">Admin setup and guides</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="adminContent" style="margin-top: 2rem;">
+                            <div class="card empty-state">
+                                <h3>Admin Panel Ready</h3>
+                                <p>Select an action above to get started</p>
+                            </div>
+                        </div>
+                    `;
                 }
 
                 appEl.innerHTML = '<header class="header"><div class="header-content">' +
@@ -2274,6 +2349,7 @@
                     '<button class="nav-tab ' + (activeTab === 'lifeGoals' ? 'active' : '') + '" onclick="switchTab(\'lifeGoals\')">Life Goals</button>' +
                     '<button class="nav-tab ' + (activeTab === 'accounts' ? 'active' : '') + '" onclick="switchTab(\'accounts\')">Accounts</button>' +
                     '<button class="nav-tab ' + (activeTab === 'analytics' ? 'active' : '') + '" onclick="switchTab(\'analytics\')">Analytics</button>' +
+                    (isAdmin ? '<button class="nav-tab ' + (activeTab === 'admin' ? 'active' : '') + '" onclick="switchTab(\'admin\')">Admin</button>' : '') +
                     '</nav></div></header>' +
                     '<main class="main-content">' + content + '</main>';
             } else if (currentPage === 'auth') {
@@ -2460,15 +2536,140 @@
             }
         }
 
+        // Check admin status
+        async function checkAdminStatus(user) {
+            try {
+                const token = await user.getIdTokenResult();
+                return token.claims.admin === true;
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+                return false;
+            }
+        }
+
+        // Admin functions
+        async function loadPlatformStats() {
+            if (!isAdmin) {
+                showNotification('Admin access required', 'error');
+                return;
+            }
+
+            try {
+                const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js');
+                const functions = getFunctions(app);
+                const getPlatformStats = httpsCallable(functions, 'getPlatformStats');
+                
+                const result = await getPlatformStats();
+                const stats = result.data;
+                
+                document.getElementById('statTotalUsers').textContent = stats.totalUsers || '0';
+                document.getElementById('statActiveUsers').textContent = stats.activeUsers || '0';
+                document.getElementById('statTransactions').textContent = stats.totalTransactions || '0';
+                document.getElementById('statAccounts').textContent = stats.totalAccounts || '0';
+                
+                showNotification('Platform statistics loaded', 'success');
+            } catch (error) {
+                console.error('Error loading platform stats:', error);
+                showNotification('Error loading stats: ' + error.message, 'error');
+            }
+        }
+
+        async function loadUserManagement() {
+            if (!isAdmin) {
+                showNotification('Admin access required', 'error');
+                return;
+            }
+
+            try {
+                const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js');
+                const functions = getFunctions(app);
+                const getAllUsers = httpsCallable(functions, 'getAllUsers');
+                
+                const result = await getAllUsers();
+                const users = result.data.users;
+                
+                let usersList = '';
+                for (let i = 0; i < users.length; i++) {
+                    const user = users[i];
+                    const statusColor = user.disabled ? '#ef4444' : '#10b981';
+                    const statusText = user.disabled ? 'Disabled' : 'Active';
+                    const adminBadge = user.isAdmin ? '<span style="background: #8b5cf6; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; margin-left: 0.5rem;">ADMIN</span>' : '';
+                    
+                    usersList += `
+                        <div class="card" style="padding: 1rem; margin-bottom: 0.5rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="flex: 1;">
+                                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">
+                                        ${user.email || 'No email'}
+                                        ${adminBadge}
+                                    </h4>
+                                    <p style="font-size: 0.875rem; color: #6b7280;">
+                                        ${user.displayName || 'No name'} • UID: ${user.uid}
+                                    </p>
+                                    <p style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">
+                                        Created: ${new Date(user.creationTime).toLocaleDateString()} • 
+                                        Last sign-in: ${user.lastSignInTime ? new Date(user.lastSignInTime).toLocaleDateString() : 'Never'}
+                                    </p>
+                                </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <span style="background: ${statusColor}; color: white; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500;">
+                                        ${statusText}
+                                    </span>
+                                    <button class="btn btn-small" onclick="toggleUserStatus('${user.uid}', ${!user.disabled})" style="background: ${user.disabled ? '#10b981' : '#ef4444'};">
+                                        ${user.disabled ? 'Enable' : 'Disable'}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                document.getElementById('adminContent').innerHTML = `
+                    <div class="section-header">
+                        <h2 class="section-title">User Management (${users.length} users)</h2>
+                    </div>
+                    ${usersList}
+                `;
+                
+                showNotification('User list loaded', 'success');
+            } catch (error) {
+                console.error('Error loading users:', error);
+                showNotification('Error loading users: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleUserStatus(uid, disable) {
+            if (!isAdmin || !confirm(`Are you sure you want to ${disable ? 'disable' : 'enable'} this user?`)) {
+                return;
+            }
+
+            try {
+                const { getFunctions, httpsCallable } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-functions.js');
+                const functions = getFunctions(app);
+                const toggleUserStatusFunc = httpsCallable(functions, 'toggleUserStatus');
+                
+                await toggleUserStatusFunc({ uid: uid, disable: disable });
+                showNotification(`User ${disable ? 'disabled' : 'enabled'} successfully`, 'success');
+                
+                // Reload user list
+                await loadUserManagement();
+            } catch (error) {
+                console.error('Error toggling user status:', error);
+                showNotification('Error: ' + error.message, 'error');
+            }
+        }
+
         // Listen for auth state changes
-        onAuthStateChanged(auth, function(user) {
+        onAuthStateChanged(auth, async function(user) {
             if (user) {
                 currentUser = user;
+                isAdmin = await checkAdminStatus(user);
                 loadUserData().then(function() {
                     render();
                 });
             } else {
                 currentUser = null;
+                isAdmin = false;
                 transactions = [];
                 accounts = [];
                 goals = [];
@@ -2509,6 +2710,9 @@
         window.updateFilter = updateFilter;
         window.exportTransactions = exportTransactions;
         window.render = render;
+        window.loadPlatformStats = loadPlatformStats;
+        window.loadUserManagement = loadUserManagement;
+        window.toggleUserStatus = toggleUserStatus;
         
         window.signOut = function() {
             signOut(auth).catch(function(error) {
