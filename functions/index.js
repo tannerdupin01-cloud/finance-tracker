@@ -40,7 +40,7 @@ exports.createLinkToken = functions.https.onRequest(async (req, res) => {
         user: {
           client_user_id: user_id,
         },
-        client_name: 'Finance Tracker',
+        client_name: 'DoughMain',
         products: ['transactions'],
         country_codes: ['US'],
         language: 'en',
@@ -265,4 +265,287 @@ exports.scheduledTransactionSync = functions.pubsub.schedule('every 24 hours').o
   }
   
   console.log('Scheduled transaction sync completed');
+});
+
+// ============ ADMIN FUNCTIONS ============
+
+// Set admin role for a user (call this manually or via admin interface)
+exports.setAdminRole = functions.https.onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    try {
+      const { email, adminKey } = req.body;
+      
+      // Verify admin key (set this in Firebase Functions config)
+      const config = functions.config();
+      const expectedKey = config.admin && config.admin.key ? config.admin.key : 'your-secret-admin-key';
+      
+      if (adminKey !== expectedKey) {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
+      
+      // Get user by email
+      const user = await admin.auth().getUserByEmail(email);
+      
+      // Set custom claim
+      await admin.auth().setCustomUserClaims(user.uid, { admin: true });
+      
+      // Update Firestore user document
+      const db = admin.firestore();
+      await db.collection('users').doc(user.uid).set({
+        admin: true,
+        adminSince: admin.firestore.FieldValue.serverTimestamp()
+      }, { merge: true });
+      
+      res.json({ 
+        success: true, 
+        message: `Admin role granted to ${email}`,
+        uid: user.uid
+      });
+    } catch (error) {
+      console.error('Error setting admin role:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+});
+
+// Check if user is admin
+exports.checkAdminStatus = functions.https.onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    try {
+      const { uid } = req.body;
+      
+      if (!uid) {
+        return res.status(400).json({ error: 'User ID required' });
+      }
+      
+      const user = await admin.auth().getUser(uid);
+      const isAdmin = user.customClaims && user.customClaims.admin === true;
+      
+      res.json({ isAdmin: isAdmin });
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+});
+
+// Get all users (admin only)
+exports.getAllUsers = functions.https.onCall(async (data, context) => {
+  // Check if user is admin
+  if (!context.auth || !context.auth.token.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only admins can access user list');
+  }
+  
+  try {
+    const listUsersResult = await admin.auth().listUsers(1000);
+    const users = listUsersResult.users.map(user => ({
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName,
+      photoURL: user.photoURL,
+      disabled: user.disabled,
+      creationTime: user.metadata.creationTime,
+      lastSignInTime: user.metadata.lastSignInTime,
+      isAdmin: user.customClaims && user.customClaims.admin === true
+    }));
+    
+    return { users };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Create/Update global content items (admin only)
+exports.manageContentItem = functions.https.onCall(async (data, context) => {
+  // Check if user is admin
+  if (!context.auth || !context.auth.token.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only admins can manage content');
+  }
+  
+  try {
+    const { action, itemId, itemData, collection } = data;
+    const db = admin.firestore();
+    
+    if (!['create', 'update', 'delete'].includes(action)) {
+      throw new functions.https.HttpsError('invalid-argument', 'Invalid action');
+    }
+    
+    if (!collection) {
+      throw new functions.https.HttpsError('invalid-argument', 'Collection name required');
+    }
+    
+    if (action === 'create') {
+      const docRef = await db.collection('global_content').doc(collection).collection('items').add({
+        ...itemData,
+        createdBy: context.auth.uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return { success: true, id: docRef.id, action: 'created' };
+    }
+    
+    if (action === 'update') {
+      if (!itemId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Item ID required for update');
+      }
+      await db.collection('global_content').doc(collection).collection('items').doc(itemId).update({
+        ...itemData,
+        updatedBy: context.auth.uid,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+      });
+      return { success: true, id: itemId, action: 'updated' };
+    }
+    
+    if (action === 'delete') {
+      if (!itemId) {
+        throw new functions.https.HttpsError('invalid-argument', 'Item ID required for delete');
+      }
+      await db.collection('global_content').doc(collection).collection('items').doc(itemId).delete();
+      return { success: true, id: itemId, action: 'deleted' };
+    }
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Get all global content items
+exports.getContentItems = functions.https.onCall(async (data, context) => {
+  try {
+    const { collection } = data;
+    
+    if (!collection) {
+      throw new functions.https.HttpsError('invalid-argument', 'Collection name required');
+    }
+    
+    const db = admin.firestore();
+    const snapshot = await db.collection('global_content').doc(collection).collection('items').get();
+    
+    const items = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    
+    return { items };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Get platform statistics (admin only)
+exports.getPlatformStats = functions.https.onCall(async (data, context) => {
+  // Check if user is admin
+  if (!context.auth || !context.auth.token.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only admins can view platform stats');
+  }
+  
+  try {
+    const db = admin.firestore();
+    
+    // Get user count
+    const listUsersResult = await admin.auth().listUsers(1000);
+    const totalUsers = listUsersResult.users.length;
+    const activeUsers = listUsersResult.users.filter(user => !user.disabled).length;
+    
+    // Get total transactions count
+    let totalTransactions = 0;
+    const usersSnapshot = await db.collection('users').get();
+    for (const userDoc of usersSnapshot.docs) {
+      const txSnapshot = await db.collection('users').doc(userDoc.id).collection('transactions').count().get();
+      totalTransactions += txSnapshot.data().count;
+    }
+    
+    // Get connected accounts count
+    let totalAccounts = 0;
+    for (const userDoc of usersSnapshot.docs) {
+      const accSnapshot = await db.collection('users').doc(userDoc.id).collection('accounts').count().get();
+      totalAccounts += accSnapshot.data().count;
+    }
+    
+    return {
+      totalUsers,
+      activeUsers,
+      totalTransactions,
+      totalAccounts,
+      timestamp: new Date().toISOString()
+    };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Disable/Enable user account (admin only)
+exports.toggleUserStatus = functions.https.onCall(async (data, context) => {
+  // Check if user is admin
+  if (!context.auth || !context.auth.token.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only admins can toggle user status');
+  }
+  
+  try {
+    const { uid, disable } = data;
+    
+    if (!uid) {
+      throw new functions.https.HttpsError('invalid-argument', 'User ID required');
+    }
+    
+    await admin.auth().updateUser(uid, { disabled: disable });
+    
+    return { 
+      success: true, 
+      uid, 
+      status: disable ? 'disabled' : 'enabled' 
+    };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Save site customization settings (admin only)
+exports.saveSiteSettings = functions.https.onCall(async (data, context) => {
+  // Check if user is admin
+  if (!context.auth || !context.auth.token.admin) {
+    throw new functions.https.HttpsError('permission-denied', 'Only admins can modify site settings');
+  }
+  
+  try {
+    const { settings } = data;
+    const db = admin.firestore();
+    
+    await db.collection('site_settings').doc('global').set({
+      ...settings,
+      updatedBy: context.auth.uid,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+    
+    return { success: true };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+// Get site customization settings
+exports.getSiteSettings = functions.https.onCall(async (data, context) => {
+  try {
+    const db = admin.firestore();
+    const doc = await db.collection('site_settings').doc('global').get();
+    
+    if (!doc.exists) {
+      // Return default settings
+      return {
+        settings: {
+          siteName: 'DoughMain',
+          tagline: 'Take Control of Your Money',
+          primaryColor: '#4f46e5',
+          secondaryColor: '#764ba2',
+          accentColor: '#667eea',
+          heroTitle: 'Transform Your Financial Future',
+          heroSubtitle: 'Your journey to financial freedom starts here. Track every dollar, crush your goals, and build the wealth you deserve.',
+          ctaText: 'Start Free Today'
+        }
+      };
+    }
+    
+    return { settings: doc.data() };
+  } catch (error) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
 });
